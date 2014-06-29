@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="LabeledEditText">
+        <attr name="android:typeface"/>
+        <attr name="android:singleLine"/>
+        <attr name="android:textSize"/>
+        <attr name="android:textColor"/>
+        <attr name="labelText" format="string"/>
+        <attr name="labelTextSize" format="dimension"/>
+        <attr name="labelTextColor" format="color"/>
+    </declare-styleable>
+</resources>
