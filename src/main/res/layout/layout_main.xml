@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="18dp">
+
+    <org.denis.LabeledEditText
+            android:id="@+id/control"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            app:labelText="My hint"/>
+
+    <EditText
+            android:id="@+id/dummy_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/control"
+            android:text="another field"/>
+
+    <TextView
+            android:id="@+id/test_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/dummy_edit"
+            android:text="This is a test text"/>
+
+    <Button
+            android:id="@+id/my_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/test_label"
+            android:layout_alignBaseline="@+id/test_label"
+            android:layout_marginLeft="20dp"
+            android:gravity="center"
+            android:text="Click me"/>
+
+
+</RelativeLayout>

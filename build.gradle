@@ -7,6 +7,10 @@ buildscript {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 apply plugin: 'android'
 
 android {
@@ -19,6 +23,10 @@ android {
     }
 }
 
+dependencies {
+    compile 'net.sourceforge.findbugs:jsr305:1.3.7' // @NotNull & @Nullable.
+}
+
 task wrapper(type: Wrapper) {
-    gradleVersion = '1.12'
+    gradleVersion = '1.11'
 }

@@ -8,5 +8,6 @@
         <attr name="labelText" format="string"/>
         <attr name="labelTextSize" format="dimension"/>
         <attr name="labelTextColor" format="color"/>
+        <attr name="animationDurationMs" format="integer"/>
     </declare-styleable>
 </resources>
