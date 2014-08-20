@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
  * @author Denis Zhdanov
  * @since 28/06/14 22:29
  */
-public class LabeledEditText extends RelativeLayout implements View.OnFocusChangeListener {
+public class LabeledEditText extends RelativeLayout implements View.OnFocusChangeListener, TextWatcher {
 
     private static final int DEFAULT_ANIMATION_DURATION_MILLIS = 300;
 
@@ -39,6 +39,8 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
 
     @Nullable private String mLabelText;
 
+    private boolean mCanShowHintToLabelAnimation = true;
+
     private float   mNormalTextSizeSp;
     private int     mNormalTextColor;
     private float   mHintTextSizeSp;
@@ -48,6 +50,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
     private int     mLabelImageBaseline;
     private int     mLabelImageTop;
     private boolean mMarginConfigured;
+    private boolean mInternalTextChangeInProgress;
 
     @SuppressWarnings("UnusedDeclaration")
     public LabeledEditText(Context context) {
@@ -89,6 +92,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
         setupLayout();
         configureAnimationView();
         mEditText.setOnFocusChangeListener(this);
+        mEditText.addTextChangedListener(this);
     }
 
     private void applyDefaultStyle() {
@@ -142,7 +146,12 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
                     String labelText = typedArray.getString(index);
                     mLabelText = TextUtils.isEmpty(labelText) ? null : labelText;
                     if (mLabelText != null) {
-                        mEditText.setText(labelText);
+                        mInternalTextChangeInProgress = true;
+                        try {
+                            mEditText.setText(labelText);
+                        } finally {
+                            mInternalTextChangeInProgress = false;
+                        }
                         mEditText.setTextColor(mHintTextColor);
                     }
                     break;
@@ -220,7 +229,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
             return;
         }
 
-        if (hasFocus && TextUtils.equals(mLabelText, mEditText.getText())) {
+        if (hasFocus && mCanShowHintToLabelAnimation) {
             animateHintToLabel();
         } else if (TextUtils.isEmpty(mEditText.getText())) {
             animateLabelToHint();
@@ -256,7 +265,12 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
             }
         });
 
-        mEditText.setText("");
+        mInternalTextChangeInProgress = true;
+        try {
+            mEditText.setText("");
+        } finally {
+            mInternalTextChangeInProgress = false;
+        }
         mEditText.setTextColor(mNormalTextColor);
         mLabelImage.setVisibility(VISIBLE);
         mLabelImage.startAnimation(animationSet);
@@ -283,7 +297,12 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                mEditText.setText(mLabelText);
+                mInternalTextChangeInProgress = true;
+                try {
+                    mEditText.setText(mLabelText);
+                } finally {
+                    mInternalTextChangeInProgress = false;
+                }
                 mEditText.setTextColor(mHintTextColor);
                 mLabelImage.setVisibility(GONE);
             }
@@ -296,6 +315,21 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
         mLabel.setText(" ");
         mLabelImage.setVisibility(VISIBLE);
         mLabelImage.startAnimation(animationSet);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        if (!mInternalTextChangeInProgress) {
+            mCanShowHintToLabelAnimation = TextUtils.isEmpty(s);
+        }
     }
 
     @Nullable
