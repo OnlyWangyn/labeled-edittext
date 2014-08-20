@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
  */
 public class LabeledEditText extends RelativeLayout implements View.OnFocusChangeListener {
 
+    private static final int DEFAULT_ANIMATION_DURATION_MILLIS = 300;
+
     @Nonnull private final int[] mLocation = new int[2];
 
     @Nonnull private final EditText  mEditText;
@@ -105,7 +107,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
         mHintTextSizeSp = mLabel.getTextSize() / spSize;
         mLabel.setTextSize(mHintTextSizeSp);
 
-        mAnimationDurationMillis = 300;
+        mAnimationDurationMillis = DEFAULT_ANIMATION_DURATION_MILLIS;
     }
 
     private void applyStyle(@Nullable AttributeSet attributes) {
@@ -151,7 +153,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
                     mLabel.setTextColor(typedArray.getColor(index, mHintTextColor));
                     break;
                 case R.styleable.LabeledEditText_animationDurationMs:
-                    mAnimationDurationMillis = typedArray.getInt(index, 300);
+                    mAnimationDurationMillis = typedArray.getInt(index, DEFAULT_ANIMATION_DURATION_MILLIS);
             }
         }
     }
@@ -218,7 +220,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
             return;
         }
 
-        if (hasFocus) {
+        if (hasFocus && TextUtils.equals(mLabelText, mEditText.getText())) {
             animateHintToLabel();
         } else if (TextUtils.isEmpty(mEditText.getText())) {
             animateLabelToHint();
