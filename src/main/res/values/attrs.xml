@@ -5,6 +5,8 @@
         <attr name="android:singleLine"/>
         <attr name="android:textSize"/>
         <attr name="android:textColor"/>
+        <attr name="android:inputType"/>
+        <attr name="android:maxLength"/>
         <attr name="labelText" format="string"/>
         <attr name="labelTextSize" format="dimension"/>
         <attr name="labelTextColor" format="color"/>

@@ -3,9 +3,7 @@ package org.denis;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.*;
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
+import android.text.*;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -15,10 +13,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +22,7 @@ import javax.annotation.Nullable;
  * @author Denis Zhdanov
  * @since 28/06/14 22:29
  */
-public class LabeledEditText extends RelativeLayout implements View.OnFocusChangeListener, TextWatcher {
+public class LabeledEditText extends ScrollView implements View.OnFocusChangeListener, TextWatcher {
 
     private static final int DEFAULT_ANIMATION_DURATION_MILLIS = 300;
 
@@ -80,6 +75,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
     }
 
     private void init(@Nullable AttributeSet attributeSet) {
+        mEditText.setFocusable(false);
         applyDefaultStyle();
         applyStyle(attributeSet);
         mEditText.setEms(10);
@@ -93,6 +89,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
     }
 
     private void applyDefaultStyle() {
+        setFocusable(true);
         mNormalTextColor = mEditText.getCurrentTextColor();
         mHintTextColor = mEditText.getHintTextColors().getDefaultColor();
 
@@ -123,7 +120,6 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
 
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         float spSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1, displayMetrics);
-
         for (int i = 0, limit = typedArray.getIndexCount(); i < limit; i++) {
             int index = typedArray.getIndex(i);
             switch (index) {
@@ -141,6 +137,12 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
                     break;
                 case R.styleable.LabeledEditText_android_textColor:
                     mEditText.setTextColor(typedArray.getColor(index, mNormalTextColor));
+                    break;
+                case R.styleable.LabeledEditText_android_inputType:
+                    mEditText.setInputType(typedArray.getInteger(index, InputType.TYPE_NULL));
+                    break;
+                case R.styleable.LabeledEditText_android_maxLength:
+                    mEditText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(typedArray.getInteger(index, 200))});
                     break;
                 case R.styleable.LabeledEditText_labelText:
                     String labelText = typedArray.getString(index);
@@ -163,29 +165,37 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
                     break;
                 case R.styleable.LabeledEditText_animationDurationMs:
                     mAnimationDurationMillis = typedArray.getInt(index, DEFAULT_ANIMATION_DURATION_MILLIS);
+                    break;
             }
         }
     }
 
     private void setupLayout() {
-        LayoutParams editTextParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        editTextParams.addRule(ALIGN_PARENT_TOP, TRUE);
-        editTextParams.addRule(ALIGN_PARENT_LEFT, TRUE);
-        addView(mEditText, editTextParams);
+        RelativeLayout layout = new RelativeLayout(getContext());
+
+        RelativeLayout.LayoutParams editTextParams
+                = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        editTextParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        editTextParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        layout.addView(mEditText, editTextParams);
 
         int editTextId = 1;
         mEditText.setId(editTextId);
 
-        LayoutParams labelParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        labelParams.addRule(ALIGN_PARENT_LEFT, TRUE);
-        labelParams.addRule(BELOW, editTextId);
-        addView(mLabel, labelParams);
+        RelativeLayout.LayoutParams labelParams
+                = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        labelParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+        labelParams.addRule(RelativeLayout.BELOW, editTextId);
+        layout.addView(mLabel, labelParams);
 
-        LayoutParams labelImageParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        labelImageParams.addRule(ALIGN_PARENT_TOP, TRUE);
-        labelImageParams.addRule(ALIGN_PARENT_LEFT, TRUE);
+        RelativeLayout.LayoutParams labelImageParams
+                = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        labelImageParams.addRule(RelativeLayout.ALIGN_PARENT_TOP, RelativeLayout.TRUE);
+        labelImageParams.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
         mLabelImage.setVisibility(GONE);
-        addView(mLabelImage, labelImageParams);
+        layout.addView(mLabelImage, labelImageParams);
+
+        addView(layout);
     }
 
     private void configureAnimationView() {
@@ -216,7 +226,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
         if (mLabelImageBaseline > 0 && !mMarginConfigured) {
             mMarginConfigured = true;
             mLabelImageTop = mEditText.getBaseline() - mLabelImageBaseline;
-            LayoutParams layoutParams = (LayoutParams) mLabelImage.getLayoutParams();
+            MarginLayoutParams layoutParams = (MarginLayoutParams) mLabelImage.getLayoutParams();
             if (layoutParams != null) {
                 layoutParams.leftMargin = mEditText.getPaddingLeft();
                 layoutParams.topMargin = mLabelImageTop;
@@ -335,10 +345,13 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
 
     @Nullable
     public Editable getText() {
-        return mEditText.getText();
+        return mCanShowHintToLabelAnimation ? null : mEditText.getText();
     }
 
     public void setText(@Nullable CharSequence text) {
+        if (mCanShowHintToLabelAnimation && TextUtils.isEmpty(text)) {
+            return;
+        }
         mEditText.setText(text);
         if (!TextUtils.isEmpty(text)) {
             mEditText.setTextColor(mNormalTextColor);
