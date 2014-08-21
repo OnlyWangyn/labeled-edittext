@@ -84,10 +84,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
         applyStyle(attributeSet);
         mEditText.setEms(10);
         mLabel.setText(" ");
-        if (TextUtils.isEmpty(mLabelText)) {
-            throw new IllegalStateException(String.format("Can't create an instance of %s: hint text is undefined (expected to be "
-                                                          + "provided via 'labelTextSize' attribute)", getClass()));
-        }
+
         setFocusableInTouchMode(true);
         setupLayout();
         configureAnimationView();
@@ -124,6 +121,9 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
             return;
         }
 
+        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
+        float spSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 1, displayMetrics);
+
         for (int i = 0, limit = typedArray.getIndexCount(); i < limit; i++) {
             int index = typedArray.getIndex(i);
             switch (index) {
@@ -137,7 +137,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
                     mEditText.setSingleLine(typedArray.getBoolean(index, true));
                     break;
                 case R.styleable.LabeledEditText_android_textSize:
-                    mEditText.setTextSize(typedArray.getDimensionPixelSize(index, (int) mNormalTextSizeSp));
+                    mEditText.setTextSize(typedArray.getDimensionPixelSize(index, (int)(mNormalTextSizeSp * spSize)) / spSize);
                     break;
                 case R.styleable.LabeledEditText_android_textColor:
                     mEditText.setTextColor(typedArray.getColor(index, mNormalTextColor));
@@ -156,7 +156,7 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
                     }
                     break;
                 case R.styleable.LabeledEditText_labelTextSize:
-                    mLabel.setTextSize(typedArray.getDimensionPixelSize(index, (int) mHintTextSizeSp));
+                    mLabel.setTextSize(typedArray.getDimension(index, (int) (mHintTextSizeSp * spSize)) / spSize);
                     break;
                 case R.styleable.LabeledEditText_labelTextColor:
                     mLabel.setTextColor(typedArray.getColor(index, mHintTextColor));
@@ -167,7 +167,8 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
         }
     }
 
-    private void setupLayout() {LayoutParams editTextParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+    private void setupLayout() {
+        LayoutParams editTextParams = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         editTextParams.addRule(ALIGN_PARENT_TOP, TRUE);
         editTextParams.addRule(ALIGN_PARENT_LEFT, TRUE);
         addView(mEditText, editTextParams);
@@ -335,6 +336,13 @@ public class LabeledEditText extends RelativeLayout implements View.OnFocusChang
     @Nullable
     public Editable getText() {
         return mEditText.getText();
+    }
+
+    public void setText(@Nullable CharSequence text) {
+        mEditText.setText(text);
+        if (!TextUtils.isEmpty(text)) {
+            mEditText.setTextColor(mNormalTextColor);
+        }
     }
 
     public void addTextChangedListener(@Nonnull TextWatcher listener) {
